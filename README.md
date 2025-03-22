@@ -6,7 +6,7 @@ Besides the script that automates the site creation, it also contains a few NGIN
 
 ## How to Use
 
-1. Create a new VPS droplet in DO for running Docker containers. You can use the Docker image provided by Docker. If you're adding a new virtual host to an existing droplet, skip to step 4.
+1. Create a new VPS instance for running Docker containers. You can use the default Docker image provided by Docker. If you're adding a new virtual host to an existing droplet, skip to step 4.
 
 2. Make sure to open ports 80 & 443 in the firewall. By default newly created Docker droplets only open ports 22, 2375 & 2376.
 
@@ -19,7 +19,7 @@ Besides the script that automates the site creation, it also contains a few NGIN
 
 4. Make the DNS entries for the new domain to point to the droplet IP. Wait a few minutes for the global DNS to be updated.
 
-5. Now we create a secure site our NGIX. Before you do this, verify that the domain entries made above do point to the new droplet IP. You can verify this by pinging the domain from your host computer (Not DO VPS as that would use the DO internal DNS servers which would've been updated the moment the entries were made in the DO control panel).
+5. Now we create a secure site our NGIX. Before you do this, verify that the domain entries made above do point to the new droplet IP. You can verify this by pinging the domain from your host computer (Not the VPS as that would use the service provider's internal DNS servers which would've been updated the moment the entries were made in their DNS control panel).
 
    Once you have verified that the new domain works, run `./setup-ssl-site.sh` with the domain name as the argument.
 
@@ -59,4 +59,5 @@ Besides the script that automates the site creation, it also contains a few NGIN
    </body>
    </html>
    ```
-   If you got the above responses, congratulations. Your secure site is up and running!
+
+   You can also visit the URL from a browser. If the secure website was served, your secure site is up and running!
