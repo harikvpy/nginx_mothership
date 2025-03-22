@@ -6,9 +6,9 @@ services:
       dockerfile: dockerfile.nginx
     volumes:
       - /var/www:/var/www
-      - ./config/etc/nginx/conf.d:/etc/nginx/conf.d
-      - ./config/etc/letsencrypt:/etc/letsencrypt
-      - ./config/var/www/certbot:/var/www/certbot
+      - /etc/nginx/conf.d:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/www/certbot:/var/www/certbot
     ports:
       - 80:80
       - 443:443
@@ -21,7 +21,7 @@ services:
       - LOCAL_UID=`id -u $USER`
       - LOCAL_GID=`id -g $USER`
     volumes:
-      - ./config/etc/letsencrypt:/etc/letsencrypt
-      - ./config/var/www/certbot:/var/www/certbot
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/www/certbot:/var/www/certbot
     # entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; --post-hook \"chown -R $LOCAL_UID:$LOCAL_UID /etc/letsencrypt/keys/* /etc/letsencrypt/archive/* && chmod -R 0644 /etc/letsencrypt/archive/* /etc/letsencrypt/keys/* && chmod 0744 /etc/letsencrypt/archive/*\"; sleep 12h & wait $${!}; done;'"

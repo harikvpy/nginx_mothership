@@ -97,8 +97,8 @@ cat > $WWWROOT/$first_domain/index.html << EOF
 EOF
 
 echo "### Creating non-secure nginx conf for $first_domain..."
-mkdir -p ./config/etc/nginx/conf.d
-cat > ./config/etc/nginx/conf.d/$first_domain.conf << EOF
+mkdir -p /etc/nginx/conf.d
+cat > /etc/nginx/conf.d/$first_domain.conf << EOF
 server {
   listen 80;
   server_name $first_domain;
@@ -116,10 +116,10 @@ EOF
 
 echo "### Creating folders to store letencrypt files for $first_domain..."
 
-mkdir -p ./config/etc/letsencrypt/live/$first_domain
-mkdir -p ./config/etc/letsencrypt/archive/$first_domain
-mkdir -p ./config/etc/letsencrypt/renewal
-mkdir -p ./config/var/www/certbot
+mkdir -p /etc/letsencrypt/live/$first_domain
+mkdir -p /etc/letsencrypt/archive/$first_domain
+mkdir -p /etc/letsencrypt/renewal
+mkdir -p /var/www/certbot
 mkdir -p /var/www
 
 echo "### Creating dummy certificate for $domains ..."
@@ -170,7 +170,7 @@ echo "### Reloading nginx ..."
 docker compose exec nginx nginx -s reload || error_exit "Failed to reload nginx"
 
 echo "### nginx reloaded successfuly. Now creating $first_domain.conf with SSL..."
-cat > ./config/etc/nginx/conf.d/$first_domain.conf << EOF
+cat > /etc/nginx/conf.d/$first_domain.conf << EOF
 server {
   listen 80;
   server_name $first_domain;
