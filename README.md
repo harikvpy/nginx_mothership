@@ -1,8 +1,8 @@
 # NGIX Mothership
 
-This contains a few scripts that would setup NGINX as a primary webserver that can host multiple domains as virtual hosts. The script automates the process of creating a NGIX site config to acquire an SSL certificate from LetsEncrypt and once acquired, updates the site config to serve the site exclusively over SSL. It also contains a certbot container to renew these certificates routinely so that they don't expire.
+This contains a script that sets up an NGINX webserver that can host multiple domains as virtual hosts. The script automates the process of creating an NGINX site config to acquire an SSL certificate from LetsEncrypt and once acquired, updates the site config to serve the site exclusively over SSL. It also contains a certbot container to renew these certificates routinely so that they don't expire.
 
-Besides the script that automates the site creation, it also contains a few NGINX specific configuration files that will be added as part of the site's `conf.d`. These provide better configuration of SSL security headers and other similar attributes.
+Besides the script that automates the site creation, it also contains a few NGINX specific configuration files that will be added as part of the site's `conf.d`. These provide better configuration of SSL security headers as per latest Mozilla recommendations.
 
 ## How to Use
 
@@ -15,27 +15,25 @@ Besides the script that automates the site creation, it also contains a few NGIN
    # ufw allow 443
    ```
 
-3. SSH into the new droplet and generate ssh keys using the `ssh-keygen` command. We will add these keys to our `github.com:harikvpy/nginx_mothership` repository. Once you have generated the keys go to the repository's Settings and add the `.ssh/id_rsa.pub` file contents as a new deploy key. This will help us pull the `qqden-deploy` repo and start using its scripts.
+3. Clone this repo locally on the VPS.
 
-4. Make the DNS entries for the new domain to point to the droplet IP. Wait a few minutes for the global DNS to be updated.
+4. Make the DNS entries for the new domain to point to the droplet IP. Wait a few minutes for the global DNS to be updated. Verify this by pinging the domain from your host computer (Not the VPS as that would use the service provider's internal DNS servers which would've been updated the moment the entries were made in their DNS control panel).
 
-5. Now we create a secure site our NGIX. Before you do this, verify that the domain entries made above do point to the new droplet IP. You can verify this by pinging the domain from your host computer (Not the VPS as that would use the service provider's internal DNS servers which would've been updated the moment the entries were made in their DNS control panel).
+5. Once you have verified that the new domain points to the right works, run `./setup-ssl-site.sh` with the domain name as the argument.
 
-   Once you have verified that the new domain works, run `./setup-ssl-site.sh` with the domain name as the argument.
+   ```
+   # ./setup-ssl-site.sh <domain name>
+   ```
 
-      ```
-      # cd nginx
-      # ./setup-ssl-site.sh <domain name>
-      ```
+   The script will 
+      1. Create a temporary nginx config file for certbot to identify the domain ownership. This
+         config file is stored in `/etc/nginx/conf.d/<domain>.conf`.
+      2. Create the necessary LetsEncrypt certificates and store them in `/etc/letsencrypt/live/<domain>`
+      3. Update the `/etc/nginx/conf.d/<domain>.conf` for SSL redirecting all HTTP traffic to SSL.
 
-      The script will 
-         1. Create the necessary folders
-         2. Create a temporary nginx config file for certbot to identify the domain ownership. This
-            config file is stored in `./config/etc/nginx/conf.d/<domain>.conf`.
-         3. Create the necessary LetsEncrypt certificates and store them in `./config/etc/letsencrypt/live/<domain>`
-         4. Update the `./config/etc/nginx/conf.d/<domain>.conf` for SSL redirecting all HTTP traffic to SSL.
+   Depending on your website's requirements, update `/etc/nginx/conf.d/<domain>.conf` appropriately. For instance, if your site is going to be served by an appserver, you would have to customize it for a reserve proxy config.
 
-      Depending on your website's requirements, update `./config/etc/nginx/conf.d/<domain>.conf` appropriately. For instance, if your site is going to be served by an appserver, you would have to customize it for a reserve proxy config.
+   Note that the various <i>live</i> config files produced by NGINX & Certbot are stored in the host machine in their native folders. These are `/etc/nginx/conf.d` and `/etc/letsencrypt`. These folders are mapped into their namesake in the `nginx` & `certbot` containres. So if you want to tweak a site's configuration, like adding virtual paths or to tweak the cache setting, you can manually edit the respective file in these folders. Typically this is only required for `nginx` configuration. LetsEncrypt files are best left alone.
 
 6. Verify that the SSL site is up and running. From your host terminal:
 
