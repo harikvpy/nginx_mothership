@@ -1,4 +1,4 @@
-# NGIX Mothership
+# NGINX Mothership
 
 This contains a bunch of scripts that sets up an host for an NGINX webserver that can host multiple domains as virtual hosts. 
 
@@ -12,6 +12,13 @@ This contains a bunch of scripts that sets up an host for an NGINX webserver tha
 | `create_ng_site_conf.sh` | Creates the NGINX config file for deploing an Angular site. |
 
 This repo also contains a few NGINX specific configuration files that will be added as part of the site's `conf.d`. These provide better configuration of SSL security headers as per Mozilla recommendations.
+
+## How to use
+
+1. Run `setup-ssl-site.sh` to create a plain old HTML website for the domain.
+2. If PostgreSQL server is required, you can install it on the host using `init-host-for-postgresql.sh`.
+3. If you're going to run a Django appserver that relies on a PostgreSQL database, create one by running `create_postgres_db.sh`. Give this command the database name, DB user name and an optional password.
+4. Use `create_django_site_conf.sh` & `create_ng_site_conf.sh` as appropriate to create virtual domain configs as per your requirements.
 
 ## setup-ssl-site.sh
 
