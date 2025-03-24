@@ -44,12 +44,12 @@ fi
 
 # Check if host has PostgreSQL installed
 postgres_count=`ps aux | grep postgres | wc -l`
-if [ "$postgres_count" -gt 1 ]
+if [ "$postgres_count" -gt 4 ]
 then
   echo "PostgreSQL is installed and running."
 else
   echo "Installing PostgreSQL"
-  ssh root@$remote_host "apt update && apt install -y postgresql postgresql-contrib" || error_exit "Error: failed to install PostgreSQL"
+  apt update && apt install -y postgresql postgresql-contrib || error_exit "Error: failed to install PostgreSQL"
   echo "PostgreSQL installed. Waiting 5 seconds..."
   countdown 5
 fi
@@ -64,12 +64,18 @@ if [ -z "$pg_version" ]; then
   exit 1
 fi
 
+# Get the host IP address
+host_ip=$(hostname -I | awk '{print $1}')
+if [ -z "$host_ip" ]; then
+  error_exit "Error: Unable to determine host IP address."
+fi
+
 echo "Updating PostgreSQL configuration..."
 sleep 1
 sed -i 's/^.*listen_addresses.*/listen_addresses = '\''localhost, 172.17.0.1'\''/g' /etc/postgresql/$pg_version/main/postgresql.conf || error_exit "Error: failed to update PostgreSQL configuration 1" 
 sed -i 's/^local.*all.*postgres.*peer/local all  postgres trust/g' /etc/postgresql/$pg_version/main/pg_hba.conf || error_exit "Error: failed to update PostgreSQL configuration 2"
-echo 'host    all      all        $remote_host/0        trust' >> /etc/postgresql/$pg_version/main/pg_hba.conf
-echo 'host    all      all        172.17.0.0/16         trust' >> /etc/postgresql/$pg_version/main/pg_hba.conf
+echo "host    all      all        $host_ip/0        trust" >> /etc/postgresql/$pg_version/main/pg_hba.conf
+echo "host    all      all        172.17.0.0/16         trust" >> /etc/postgresql/$pg_version/main/pg_hba.conf
 systemctl restart postgresql || error_exit "Error: failed to restart PostgreSQL"
 
 echo "PostgreSQL configuration updated."
