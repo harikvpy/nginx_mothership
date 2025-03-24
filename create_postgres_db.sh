@@ -11,7 +11,7 @@ function error_exit
 }
 
 # Verify arguments
-if [ "$#" -ne 2 ]; then
+if [ "$#" -lt 2 ]; then
   echo "Please specify the database name and DB user name as arguments."
   echo
   echo "Usage: $0 <db_name> <db_user> [<db_password>]"
