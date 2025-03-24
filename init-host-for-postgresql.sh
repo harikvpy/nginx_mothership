@@ -32,14 +32,13 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
-
-# Check if the remote host is running docker
-if "docker --version" &> /dev/null
+#' Check if the remote host is running docker
+docker_version=`docker --version`
+if [ "$docker_version" == "" ]
 then
-  echo "Remote host is running docker"
-else
   echo "Remote host is not running docker"
-  exit 1
+else
+  echo "Remote host is running docker"
 fi
 
 
@@ -56,7 +55,7 @@ else
 fi
 
 # Get Postgresql version (only major version)
-pg_version=$( "psql --version" | awk '{print $3}' | cut -d '.' -f 1)
+pg_version=`psql --version | awk '{print $3}' | cut -d '.' -f 1`
 echo "PostgreSQL version: $pg_version"
 
 # If pg_version is empty, then PostgreSQL is not installed
