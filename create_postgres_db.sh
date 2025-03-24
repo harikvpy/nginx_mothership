@@ -1,10 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 # ##########################################################################
 # Script to create a PostgreSQL database. Specify the database name and DB
 # user as arguments.
 # ##########################################################################
 
-# Function to display error message and exit
 function error_exit
 {
     echo "$1" 1>&2
@@ -20,6 +19,8 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
+$db=$1
+$db_user=$2
 
 # Check if host has PostgreSQL installed
 postgres_count=`ps aux | grep postgres | wc -l`
@@ -32,8 +33,8 @@ else
 fi
 
 echo "Creating PostgreSQL database $db..."
-psql -U postgres -c 'DROP DATABASE IF EXISTS $db; CREATE DATABASE $db;'
-psql -U postgres -c 'DROP USER IF EXISTS $db; CREATE USER $db WITH PASSWORD '\''$db'\''; GRANT ALL PRIVILEGES ON DATABASE $db TO $db;'"
+psql -U postgres -c "DROP DATABASE IF EXISTS $db; CREATE DATABASE $db;"
+psql -U postgres -c "DROP USER IF EXISTS $db; CREATE USER $db_user WITH PASSWORD '\''$db_user'\''; GRANT ALL PRIVILEGES ON DATABASE $db TO $db_user;'"
 
 
 echo "PostgreSQL database $db created. Waiting 5 seconds..."
