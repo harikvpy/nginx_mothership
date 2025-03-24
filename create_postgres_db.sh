@@ -47,8 +47,10 @@ else
 fi
 
 echo "Creating PostgreSQL database $db..."
-psql -U postgres -c "DROP DATABASE IF EXISTS $db; CREATE DATABASE $db;"
-psql -U postgres -c "DROP USER IF EXISTS $db; CREATE USER $db_user WITH PASSWORD '\''$db_password'\''; GRANT ALL PRIVILEGES ON DATABASE $db TO $db_user;'"
+psql -U postgres -c "DROP DATABASE IF EXISTS $db;" || error_exit "Error: failed to drop database $db"
+psql -U postgres -c "CREATE DATABASE $db;" || error_exit "Error: failed to create database $db"
+psql -U postgres -c "DROP USER IF EXISTS $db;" || error_exit "Error: failed to drop user $db_user"
+psql -U postgres -c "CREATE USER $db_user WITH PASSWORD '$db_password'; GRANT ALL PRIVILEGES ON DATABASE $db TO $db_user;" || error_exit "Error: failed to create user $db_user"
 
 echo "PostgreSQL database $db and user $db_user created."
 echo "Done"
