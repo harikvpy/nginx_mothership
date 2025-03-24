@@ -14,13 +14,27 @@ function error_exit
 if [ "$#" -ne 2 ]; then
   echo "Please specify the database name and DB user name as arguments."
   echo
-  echo "Usage: $0 <db_name> <db_user>"
+  echo "Usage: $0 <db_name> <db_user> [<db_password>]"
   echo
   exit 1
 fi
 
+# Root user check
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
+  exit
+fi
+
+# Default db_password to db_user
+if [ "$#" -eq 2 ]; then
+  db_password=$2
+else:
+  db_password=$3
+fi
+
 db=$1
 db_user=$2
+echo "Creating PostgreSQL database $db and user $db_user; password: $db_password"
 
 # Check if host has PostgreSQL installed
 postgres_count=`ps aux | grep postgres | wc -l`
@@ -34,11 +48,7 @@ fi
 
 echo "Creating PostgreSQL database $db..."
 psql -U postgres -c "DROP DATABASE IF EXISTS $db; CREATE DATABASE $db;"
-psql -U postgres -c "DROP USER IF EXISTS $db; CREATE USER $db_user WITH PASSWORD '\''$db_user'\''; GRANT ALL PRIVILEGES ON DATABASE $db TO $db_user;'"
-
-
-echo "PostgreSQL database $db created. Waiting 5 seconds..."
-
+psql -U postgres -c "DROP USER IF EXISTS $db; CREATE USER $db_user WITH PASSWORD '\''$db_password'\''; GRANT ALL PRIVILEGES ON DATABASE $db TO $db_user;'"
 
 echo "PostgreSQL database $db and user $db_user created."
 echo "Done"
