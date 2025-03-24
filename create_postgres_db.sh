@@ -28,7 +28,7 @@ fi
 # Default db_password to db_user
 if [ "$#" -eq 2 ]; then
   db_password=$2
-else:
+else
   db_password=$3
 fi
 
