@@ -19,8 +19,8 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 
-$db=$1
-$db_user=$2
+db=$1
+db_user=$2
 
 # Check if host has PostgreSQL installed
 postgres_count=`ps aux | grep postgres | wc -l`
@@ -38,6 +38,10 @@ psql -U postgres -c "DROP USER IF EXISTS $db; CREATE USER $db_user WITH PASSWORD
 
 
 echo "PostgreSQL database $db created. Waiting 5 seconds..."
-# countdown 5 seconds
-countdown 5
 
+
+echo "PostgreSQL database $db and user $db_user created."
+echo "Done"
+exit 0
+# ##########################################################################
+# End of script
