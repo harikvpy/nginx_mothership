@@ -1,10 +1,21 @@
 # NGIX Mothership
 
-This contains a script that sets up an NGINX webserver that can host multiple domains as virtual hosts. The script automates the process of creating an NGINX site config to acquire an SSL certificate from LetsEncrypt and once acquired, updates the site config to serve the site exclusively over SSL. It also contains a certbot container to renew these certificates routinely so that they don't expire.
+This contains a bunch of scripts that sets up an host for an NGINX webserver that can host multiple domains as virtual hosts. 
 
-Besides the script that automates the site creation, it also contains a few NGINX specific configuration files that will be added as part of the site's `conf.d`. These provide better configuration of SSL security headers as per latest Mozilla recommendations.
+## Scripts
+| Script Name          | Description                                                                 |
+|----------------------|-----------------------------------------------------------------------------|
+| `setup-ssl-site.sh`  | Automates the creation of an NGINX site config, acquires SSL certificates, and updates the config for SSL-only traffic. |
+| `init-host-for-postgresql.sh` | A script to install PostgreSQL binding it to localhost and docker internal network. Script also modifies it settings to password free local login.  |
+| `create_postgres_db.sh` | Creates a PostgreSQL database with given name, role & password. |
+| `create_django_site_conf.sh` | Creates the NGINX config file for deploying a Django appserver. |
+| `create_ng_site_conf.sh` | Creates the NGINX config file for deploing an Angular site. |
 
-## How to Use
+This repo also contains a few NGINX specific configuration files that will be added as part of the site's `conf.d`. These provide better configuration of SSL security headers as per Mozilla recommendations.
+
+## setup-ssl-site.sh
+
+Thi script automates the process of creating an NGINX site config to acquire an SSL certificate from LetsEncrypt and once acquired, updates the site config to serve the site exclusively over SSL. It also contains a certbot container to renew these certificates routinely so that they don't expire.
 
 1. Create a new VPS instance for running Docker containers. You can use the default Docker image provided by Docker. If you're adding a new virtual host to an existing droplet, skip to step 4.
 
