@@ -1,11 +1,15 @@
 #!/bin/bash
 # #####################################################################
-# This script can be used to create a new Django site configuration
-# file. To use:
+# This script can be used to create a new app server configuration. The
+# app server will run behind nginx and will be proxied by nginx. The
+# script creates the nginx configuration for the app server and writes
+# it to stdout. You can redirect the output to a file if you wish.
+# 
+# To use:
 #
-#   # ./create_django_site_conf.sh <domain_name> <appserver_interface>
+#   # ./create_app_server_config.sh <domain_name> <appserver_interface>
 #
-#   A new Django site configuration file would be created for
+#   A new app server configuration file would be created for
 #   <domain_name>. The configuration will be written to stdout. You
 #   can redirect it to a file if you wish.
 # #####################################################################
@@ -15,10 +19,10 @@ if [ "$#" -lt 1 ]; then
   echo "Illegal number of arguments."
   echo
   echo Usage:
-  echo "  ./create_django_site_conf.sh <domain_name> [<appserver_interface>]"
+  echo "  ./create_app_server_config.sh <domain_name> [<appserver_interface>]"
   echo
-  echo "Specify a single domain to create a Django site configuration"
-  echo "file as the mandatory argument. You may optionally specify the"
+  echo "Specify a single domain as the mandatory argument to create an app "
+  echo "server configuration file. You may optionally specify the"
   echo "interface of the appserver container to proxy requests to as the"
   echo "second argument. If you don't specify the second argument, the"
   echo "default value of 172.17.0.1:8000 would be used."
@@ -44,7 +48,7 @@ domain_appserver="${domain_sanitized}_appserver"
 cat <<EOF
 # ##########################################################################
 # NGIX configuration for $domain
-# Created by github.com/harikvpy/nginx_mothership/create_django_site_conf.sh
+# Created by github.com/harikvpy/nginx_mothership/create_app_server_config.sh
 # ##########################################################################
 
 upstream $domain_appserver {

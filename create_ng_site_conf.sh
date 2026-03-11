@@ -3,9 +3,9 @@
 # This script can be used to create a new Angular site configuration
 # file. To use:
 #
-#   # ./create_django_site_conf.sh <domain_name>
+#   # ./create_ng_site_conf.sh <domain_name>
 #
-#   A new Django site configuration file would be created for
+#   A new NGINX site configuration file would be created for
 #   <domain_name>. The configuration will be written to stdout. You
 #   can redirect it to a file if you wish.
 # #####################################################################
@@ -19,9 +19,9 @@ if [ "$#" -lt 1 ]; then
   echo "Illegal number of arguments."
   echo
   echo Usage:
-  echo "  ./create_django_site_conf.sh <domain_name>"
+  echo "  ./create_ng_site_conf.sh <domain_name>"
   echo
-  echo "Specify a single domain to create a Django site configuration"
+  echo "Specify a single domain to create an NGINX site configuration"
   echo "file as the mandatory argument."
   echo
   exit 1

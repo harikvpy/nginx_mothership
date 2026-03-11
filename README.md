@@ -1,15 +1,16 @@
 # NGINX Mothership
 
-This contains a bunch of scripts that sets up an host for an NGINX webserver that can host multiple domains as virtual hosts. 
+This contains a bunch of scripts that sets up an host for an NGINX webserver that can host multiple domains as virtual hosts.
 
 ## Scripts
-| Script Name          | Description                                                                 |
-|----------------------|-----------------------------------------------------------------------------|
-| `setup-ssl-site.sh`  | Automates the creation of an NGINX site config, acquires SSL certificates, and updates the config for SSL-only traffic. |
-| `init-host-for-postgresql.sh` | A script to install PostgreSQL binding it to localhost and docker internal network. Script also modifies it settings to password free local login.  |
-| `create_postgres_db.sh` | Creates a PostgreSQL database with given name, role & password. |
-| `create_django_site_conf.sh` | Creates the NGINX config file for deploying a Django appserver. |
-| `create_ng_site_conf.sh` | Creates the NGINX config file for deploing an Angular site. |
+
+| Script Name                   | Description                                                                                                                                        |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `setup-ssl-site.sh`           | Automates the creation of an NGINX site config, acquires SSL certificates, and updates the config for SSL-only traffic.                            |
+| `init-host-for-postgresql.sh` | A script to install PostgreSQL binding it to localhost and docker internal network. Script also modifies it settings to password free local login. |
+| `create_postgres_db.sh`       | Creates a PostgreSQL database with given name, role & password.                                                                                    |
+| `create_app_server_conf.sh`   | Creates the NGINX config file for deploying an appserver.                                                                                          |
+| `create_ng_site_conf.sh`      | Creates the NGINX config file for deploing an Angular site.                                                                                        |
 
 This repo also contains a few NGINX specific configuration files that will be added as part of the site's `conf.d`. These provide better configuration of SSL security headers as per Mozilla recommendations.
 
@@ -17,8 +18,8 @@ This repo also contains a few NGINX specific configuration files that will be ad
 
 1. Run `setup-ssl-site.sh` to create a plain old HTML website for the domain.
 2. If PostgreSQL server is required, you can install it on the host using `init-host-for-postgresql.sh`.
-3. If you're going to run a Django appserver that relies on a PostgreSQL database, create one by running `create_postgres_db.sh`. Give this command the database name, DB user name and an optional password.
-4. Use `create_django_site_conf.sh` & `create_ng_site_conf.sh` as appropriate to create virtual domain configs as per your requirements.
+3. If you're going to run an appserver that relies on a PostgreSQL database, create one by running `create_postgres_db.sh`. Give this command the database name, DB user name and an optional password.
+4. Use `create_app_server_conf.sh` & `create_ng_site_conf.sh` as appropriate to create virtual domain configs as per your requirements.
 
 ## setup-ssl-site.sh
 
@@ -43,11 +44,11 @@ Thi script automates the process of creating an NGINX site config to acquire an 
    # ./setup-ssl-site.sh <domain name>
    ```
 
-   The script will 
-      1. Create a temporary nginx config file for certbot to identify the domain ownership. This
-         config file is stored in `/etc/nginx/conf.d/<domain>.conf`.
-      2. Create the necessary LetsEncrypt certificates and store them in `/etc/letsencrypt/live/<domain>`
-      3. Update the `/etc/nginx/conf.d/<domain>.conf` for SSL redirecting all HTTP traffic to SSL.
+   The script will
+   1. Create a temporary nginx config file for certbot to identify the domain ownership. This
+      config file is stored in `/etc/nginx/conf.d/<domain>.conf`.
+   2. Create the necessary LetsEncrypt certificates and store them in `/etc/letsencrypt/live/<domain>`
+   3. Update the `/etc/nginx/conf.d/<domain>.conf` for SSL redirecting all HTTP traffic to SSL.
 
    Depending on your website's requirements, update `/etc/nginx/conf.d/<domain>.conf` appropriately. For instance, if your site is going to be served by an appserver, you would have to customize it for a reserve proxy config.
 
