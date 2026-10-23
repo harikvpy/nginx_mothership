@@ -66,18 +66,15 @@ server {
         expires -1;
         add_header Cache-Control 'no-store, no-cache, must-revalidate,
             proxy-revalidate, max-age=0';
-        include /etc/nginx/security-headers.conf;
     }
 
     location ~ .*\.css$|.*\.js$ {
         add_header Cache-Control 'max-age=604800'; # one week
-        include /etc/nginx/security-headers.conf;
     }
 
     location / {
         try_files \$uri \$uri/ /index.html;
         add_header Cache-Control 'max-age=86400'; # one day
-        include /etc/nginx/security-headers.conf;
     }
 
     # certbot config

@@ -22,7 +22,7 @@ function error_exit
     exit 1
 }
 
-if ! [ -x "$(command -v docker compose)" ]; then
+if ! docker compose version > /dev/null 2>&1; then
   echo 'Error: docker compose is not installed.' >&2
   exit 1
 fi
@@ -30,7 +30,7 @@ fi
 # Root user check
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root"
-  exit
+  exit 1
 fi
 
 if [ "$#" -ne 1 ]; then
@@ -51,11 +51,11 @@ fi
 
 domains=($1)
 rsa_key_size=4096
-data_path="/var/nginx/certbot"
 email="hari@smallpearl.com" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 # Join $domains to -d args
+server_names="${domains[*]}"
 first_domain=""
 domains_arg=""
 for domain in "${domains[@]}"; do
@@ -66,21 +66,6 @@ for domain in "${domains[@]}"; do
 done
 # echo "domains_arg: $domains_arg, first_domain: $first_domain"
 # exit 1
-
-# if [ -d "$data_path" ]; then
-#   read -p "Existing data found for $domains. Continue and replace existing certificate? (y/N) " decision
-#   if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
-#     exit
-#   fi
-# fi
-
-# if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
-#   echo "### Downloading recommended TLS parameters ..."
-#   mkdir -p "$data_path/conf"
-#   curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
-#   curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
-#   echo
-# fi
 
 echo "### Creating placeholder index.html page for $first_domain..."
 WWWROOT="/var/www"
@@ -101,7 +86,7 @@ mkdir -p /etc/nginx/conf.d
 cat > /etc/nginx/conf.d/$first_domain.conf << EOF
 server {
   listen 80;
-  server_name $first_domain;
+  server_name $server_names;
 
   location /.well-known/acme-challenge/ {
       root /var/www/certbot;
@@ -114,34 +99,12 @@ server {
 }
 EOF
 
-echo "### Creating folders to store letencrypt files for $first_domain..."
-
-mkdir -p /etc/letsencrypt/live/$first_domain
-mkdir -p /etc/letsencrypt/archive/$first_domain
-mkdir -p /etc/letsencrypt/renewal
 mkdir -p /var/www/certbot
-mkdir -p /var/www
-
-echo "### Creating dummy certificate for $domains ..."
-path="/etc/letsencrypt/live"
-mkdir -p "$data_path/conf/live/$first_domain"
-docker compose run --rm --entrypoint "\
-  openssl req -x509 -nodes -newkey rsa:1024 -days 1\
-    -keyout '$path/$first_domain/privkey.pem' \
-    -out '$path/$first_domain/fullchain.pem' \
-    -subj '/CN=localhost'" certbot || error_exit "Failed to create dummy certificate"
-echo
-
 
 echo "### Starting nginx ..."
-docker compose up --force-recreate -d nginx || error_exit "Failed to start nginx"
-echo
-
-echo "### Deleting dummy certificate for $domains ..."
-docker compose run --rm --entrypoint "\
-  rm -Rf /etc/letsencrypt/live/$first_domain && \
-  rm -Rf /etc/letsencrypt/archive/$first_domain && \
-  rm -Rf /etc/letsencrypt/renewal/$first_domain.conf" certbot || error_exit "Failed to delete dummy certificate"
+docker compose up -d nginx || error_exit "Failed to start nginx"
+docker compose exec nginx nginx -t || error_exit "nginx config test failed for $first_domain.conf"
+docker compose exec nginx nginx -s reload || error_exit "Failed to reload nginx"
 echo
 
 echo "### Requesting Let's Encrypt certificate for $domains ..."
@@ -157,7 +120,7 @@ if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
 docker compose run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
-    --cert-name $first_domain
+    --cert-name $first_domain \
     $staging_arg \
     $email_arg \
     $domains_arg \
@@ -166,24 +129,24 @@ docker compose run --rm --entrypoint "\
     --force-renewal" certbot || error_exit "Failed to request certificate"
 echo
 
-echo "### Reloading nginx ..."
-docker compose exec nginx nginx -s reload || error_exit "Failed to reload nginx"
-
-echo "### nginx reloaded successfuly. Now creating $first_domain.conf with SSL..."
+echo "### Creating $first_domain.conf with SSL..."
 cat > /etc/nginx/conf.d/$first_domain.conf << EOF
 server {
   listen 80;
-  server_name $first_domain;
+  server_name $server_names;
+
+  location /.well-known/acme-challenge/ {
+    root /var/www/certbot;
+  }
+
   location / {
-    return 301 https://$host$request_uri;
+    return 301 https://$first_domain\$request_uri;
   }
 }
 
 server {
-  set \$DOMAIN "$first_domain";
-
   listen 443 ssl;
-  server_name $first_domain;
+  server_name $server_names;
 
   ssl_certificate /etc/letsencrypt/live/$first_domain/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/$first_domain/privkey.pem;
@@ -192,12 +155,12 @@ server {
   location / {
     root /var/www/$first_domain;
     try_files \$uri \$uri/ /index.html;
-    include /etc/nginx/security-headers.conf;
   }
 }
 EOF
 
-echo "### Restarting nginx ..."
-docker compose exec nginx nginx -s reload
+echo "### Reloading nginx ..."
+docker compose exec nginx nginx -t || error_exit "nginx config test failed for $first_domain.conf"
+docker compose exec nginx nginx -s reload || error_exit "Failed to reload nginx"
 echo "### Done!"
 exit 0
