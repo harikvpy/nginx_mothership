@@ -85,7 +85,6 @@ server {
     ssl_certificate /etc/letsencrypt/live/$domain/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/$domain/privkey.pem;
     include /etc/nginx/options-ssl-nginx.conf;
-    ssl_dhparam /etc/nginx/ssl-dhparams.pem;
 }
 EOF
 exit 0
