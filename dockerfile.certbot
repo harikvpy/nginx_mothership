@@ -1,0 +1,5 @@
+# A wrapper file around certbot/certbot so that we can apply
+# the patch for eMudhra certificate vulnerability
+FROM certbot/certbot
+RUN apk upgrade --no-cache ca-certificates ca-certificates-bundle \
+ && pip install --no-cache-dir -U certifi
